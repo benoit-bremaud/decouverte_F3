@@ -1,6 +1,12 @@
-# Bootcamp PHP (4h) — Construire une micro‑API MVC avec Fat‑Free Framework
+# Bootcamp PHP (4h) — Construire une micro‑API MVC avec Fat‑Free Framework (F3)
 
-> Public : étudiants 3ᵉ/4ᵉ année info • Objectif : produire une API RESTful fonctionnelle (CRUD + Auth) en 4h, en découvrant **Fat‑Free Framework (F3)** — un micro‑framework PHP minimaliste et très différent des habituels Laravel/Symfony.
+### F3 (Fat‑Free Framework) en bref — pourquoi on l’utilise aujourd’hui
+
+* **Micro & rapide à prendre en main** : cœur unique, très peu de magie, quasi zéro boilerplate.
+* **Routing clair + MVC minimal** : on visualise immédiatement le flux *route → contrôleur → modèle*.
+* **Mapper SQL intégré** : Data Mapper léger (SQLite/MySQL/PostgreSQL) pour un CRUD propre sans lourdeur.
+* **Productif pour une API** : réponses JSON simples, hook `beforeroute` pour la protection, structure lisible.
+* **Idéal en bootcamp** : focus sur les fondamentaux PHP web (sans framework « usine à gaz »), on comprend, on expérimente, on shippe vite.
 
 ---
 
@@ -14,29 +20,102 @@
 
 ---
 
-## Plan des 4 heures (timing indicatif)
-
-**00:00 → 00:20** • Kick‑off & setup (composer, serveur interne, Hello route)
-
-**00:20 → 01:00** • Modèle & persistance : SQLite + Mapper, script de migration
-
-**01:00 → 02:10** • CRUD JSON : `GET/POST/PUT/DELETE /api/v1/notes`
-
-**02:10 → 03:10** • Auth JWT : `POST /auth/register`, `POST /auth/login`, middleware
-
-**03:10 → 03:40** • Durcissement : validation, erreurs, CORS, pagination
-
-**03:40 → 04:00** • Tests finaux (curl/Postman) + README + pistes d’extension
-
-> Conseils pédagogiques : travaillez **en binôme**, objectif *ship it* (80/20).
-
----
-
 ## Pré‑requis matériels
 
 * PHP ≥ 8.1, Composer
 * SQLite3 installé (ou embarqué via PHP pdo\_sqlite)
 * Un terminal + curl (ou Postman, Insomnia)
+
+> Si vous partez **vraiment de zéro**, commencez par l’**Étape 0** ci‑dessous (install & outillage). Les autres peuvent la **skipper**.
+
+---
+
+## 0) Étape 0 — Environnement & outils (optionnelle)
+
+### 0.1 Vérifier PHP & extensions
+
+```bash
+php -v            # attendre PHP >= 8.1
+php -m | grep -i sqlite   # Linux/macOS : vérifier pdo_sqlite/sqlite3
+php -m | grep -i openssl  # requis pour JWT
+# Windows (PowerShell) :
+php -m | findstr /I sqlite
+php -m | findstr /I openssl
+```
+
+> Si `sqlite` n’apparaît pas : installez/activez **sqlite3/pdo\_sqlite** (selon OS). Si `openssl` manque : activez l’extension **openssl** (php.ini).
+
+### 0.2 Installer Composer
+
+* **macOS (Homebrew)** : `brew install php composer`
+* **Linux (globale)** :
+
+  ```bash
+  php -r "copy('https://getcomposer.org/installer','composer-setup.php');"
+  php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  composer -V
+  ```
+* **Windows** : installeur graphique sur getcomposer.org (ou `choco install composer`).
+
+### 0.3 Visual Studio Code (recommandé)
+
+Extensions utiles (facultatif mais confort) :
+
+* **PHP Intelephense** (Lint & IntelliSense)
+* **PHP Debug** (Xdebug – non nécessaire pour ce bootcamp, mais utile)
+* **REST Client** *ou* **Thunder Client** (tester l’API sans quitter VS Code)
+* **EditorConfig for VS Code** (style homogène)
+
+### 0.4 Démarrer un dossier de projet
+
+```bash
+mkdir micro-api-f3 && cd micro-api-f3
+# Optionnel : versionner
+git init
+printf "/vendor/\n/data/*.db\n/.env\n" > .gitignore
+
+# Initialiser Composer et ajouter les dépendances dès maintenant
+composer init -n
+composer require bcosca/fatfree firebase/php-jwt
+```
+
+> On utilisera l’autoload de F3 (`AUTOLOAD app/`) et l’autoloader Composer pour les libs.
+
+### 0.5 Terminal intégré & serveur local
+
+Dans VS Code : **View → Terminal** pour ouvrir le terminal dans le dossier.
+Le serveur PHP sera lancé **après** avoir créé `public/index.php` (Étape 1) :
+
+```bash
+php -S localhost:8000 -t public
+```
+
+### 0.6 Outils de test d’API
+
+* **curl** (en ligne de commande) :
+
+  ```bash
+  curl -i http://localhost:8000/
+  ```
+* **REST Client** (VS Code) : créez `requests.http` :
+
+  ```http
+  GET http://localhost:8000/
+
+  ###
+  POST http://localhost:8000/auth/login
+  Content-Type: application/json
+
+  {"email":"a@b.com","password":"secret123"}
+  ```
+
+### 0.7 Dépannage express
+
+* `Class 'Base' not found` → F3 non installé ou autoload manquant : `composer require bcosca/fatfree` et vérifiez `require vendor/autoload.php`.
+* `404` sur `/` → vérifier le **document root** `-t public` et la présence de `public/index.php`.
+* JWT/openssl → activer l’extension **openssl** dans `php.ini`.
+* SQLite indisponible → installez **php-sqlite3/pdo\_sqlite**.
+* Port occupé → `php -S localhost:8080 -t public`.
 
 ---
 
@@ -428,11 +507,3 @@ curl -s -X DELETE -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1
 * **Packaging** : `.env` + Dotenv, Docker Compose (php-fpm + nginx + sqlite volume).
 
 ---
-
-## 10) FAQ minute
-
-* **Pourquoi F3 ?** Ultra léger (un fichier cœur), learning curve rapide, parfait pour voir l’essentiel sans magie.
-* **Pourquoi SQLite ?** Zéro friction pour un bootcamp, portable, suffisant pour l’exercice.
-* **Pourquoi JWT ?** Statelss, facile à tester au curl, prépare à l’expo front/API.
-
-Bon bootcamp 🚀

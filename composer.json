@@ -1,0 +1,14 @@
+{
+  "name": "benoit-bremaud/decouverte_f3",
+  "description": "Projet Découverte F3 - API REST avec Fat-Free Framework",
+  "type": "project",
+  "require": {
+    "bcosca/fatfree": "^3.8",
+    "firebase/php-jwt": "^6.9"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}

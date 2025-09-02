@@ -1,4 +1,4 @@
-# Bootcamp PHP (4h) — Construire une micro‑API MVC avec Fat‑Free Framework (F3)
+# Bootcamp PHP (3h) — Construire une micro‑API MVC avec Fat‑Free Framework (F3)
 
 ### F3 (Fat‑Free Framework) en bref — pourquoi on l’utilise aujourd’hui
 
